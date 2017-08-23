@@ -29,7 +29,7 @@ int TestModule::execute(void)
 
 extern "C"
 {
-    void *createModuleObject(int arg)
+    Base *createModuleObject(int arg)
     {
         return new TestModule(arg);
     }
