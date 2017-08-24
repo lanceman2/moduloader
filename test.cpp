@@ -1,9 +1,14 @@
 
 #include "moduloader.hpp"
 #include "base.hpp"
+#define DEBUG
+#include "debug.hpp"
 
 int main(void)
 {
+    SPEW("\n");
+    SPEW("more spew\n");
+
     Base *testModule =
        Moduloader<Base>("testModule.so", 0);
 
