@@ -7,7 +7,7 @@
 int main(void)
 {
     SPEW("\n");
-    SPEW("more spew\n");
+    SPEW("more spew %d\n", 56);
 
     Base *testModule =
        Moduloader<Base>("testModule.so", 0);

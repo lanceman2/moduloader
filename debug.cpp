@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <stdarg.h>
 #include "debug.hpp"
 
@@ -25,10 +27,18 @@ void SYM_PRX_spew(const char *pre, const char *file,
     va_end(ap);
 }
 
-void SYM_PRX_assert(const char *pre, const char *file,
-        int line, const char *func,
-        const char *format, ...)
+void SYM_PRX_assertAction()
 {
-
+    pid_t pid;
+    pid = getpid();
+    ERROR("Consider running: \n\n  gdb -p %u\n\n  "
+        "pid=%u will now SLEEP ...\n", pid, pid);
+    while(1) { sleep(1); }
 }
+
+// Add this to the start of your code so you may see where your code is
+// seg faulting.
+void STM_PRX_catchSigFault(void)
+{
+    
 
