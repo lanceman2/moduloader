@@ -18,90 +18,83 @@
 
 #include <stdbool.h>
 
-
-#ifndef SYM_PRX
-// Function name prefix used in debug.cpp so exposed symbols have this
-// prefix.  With compiler options the prefix can hide or expose symbols.
-// You also can use it like an API prefix, like a C style name space.
-//
-// Sorry C++ can't beat the CPP coupled with the printf streams for
-// selecting code at compile time.
-//
-//Example:
-//#define SYM_PRX   ACME_TOOL_
-
-// empty
-#define SYM_PRX
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-
-extern void SYM_PRX_spew(const char *pre, const char *file,
+extern void _spew(const char *pre, const char *file,
         int line, const char *func, const char *fmt, ...)
          // check printf format errors at compile time:
         __attribute__ ((format (printf, 5, 6)));
 
-extern void SYM_PRX_assertAction(void);
-extern void STM_PRX_catchSigFault(void);
+extern void _assertAction(void);
+extern void _catchSigFault(void);
 
+//#pragma GCC system_header
 
 #  define _SPEW(pre, fmt, ... )\
-     SYM_PRX_spew(pre, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
+     _spew(pre, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 
 #  define ERROR(fmt, ...)\
-     SYM_PRX_spew("ERROR: ", __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
+     _spew("ERROR: ", __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 
 #  define ASSERT(val) \
     do {\
         if(!((bool) val)) {\
-            _SPEW("ERROR: ", "ASSERTION(%s) failed\n", #val);\
-            SYM_PRX_assertAction();\
+                _SPEW("ERROR: ", "ASSERTION(%s) failed\n", #val);\
+                _assertAction();\
         }\
+    }\
     while(0)
             
 #  define VASSERT(val, fmt, ...) \
     do {\
         if(!((bool) val)) {\
             _SPEW("ERROR: ", "ASSERTION(%s) failed: " #fmt, #val, ##__VA_ARGS__);\
-            SYM_PRX_assertAction();\
+            _assertAction();\
         }\
+    }\
     while(0)
 
 
 #  define FAIL(fmt, ...) \
     do {\
         _SPEW("ERROR:", fmt, ##__VA_ARGS__);\
-        SYM_PRX_assertAction();\
+        _assertAction();\
     } while(0)
 
-#  define ERROR(fmt, ...)\
-     SYM_PRX_spew(pre, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 
 
 #ifdef DEBUG
 
-#  define _SPEW(pre, fmt, ... )\
-     SYM_PRX_spew(pre, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 
 #  define SPEW(fmt, ...) _SPEW("SPEW: ", fmt, ##__VA_ARGS__)
 
 #  define WARN(fmt, ...) _SPEW("WARN: ", fmt, ##__VA_ARGS__)
 
+#  define NOTICE() _SPEW("NOTICE: ", fmt, ##__VA_ARGS__)
+#  define DSPEW()  _SPEW("DEBUG: ", fmt, ##__VA_ARGS__)
+
+#  define DASSERT(x)  ASSERT(val)
+#  define DVASSERT(x) VASSERT(val, fmt, ##__VA_ARGS__)
 
 
 #else
 
 
-#  define SPEW()    /* empty marco */
+#  define SPEW()      /* empty marco */
 
-#  define WARN()    /* empty marco */
-#  define NOTICE()  /* empty marco */
-#  define DSPEW()   /* empty marco */
+#  define WARN()      /* empty marco */
+#  define NOTICE()    /* empty marco */
+#  define DSPEW()     /* empty marco */
 
-#  define DASSERT() /* empty marco */
-
+#  define DASSERT()   /* empty marco */
+#  define DVASSERT(x) /* empty marco */
 
 
 #endif // #ifdef DEBUG
 
-#undef _SPEW
+#ifdef __cplusplus
+}
+#endif
 
