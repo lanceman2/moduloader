@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <string.h>
 #include "debug.h"
 
 #ifndef SPEW_FILE
@@ -54,13 +55,9 @@ static void segSaultCatcher(int sig)
 // seg faulting.
 void _catchSigFault(void)
 {
-    struct sigaction s = {
-        segSaultCatcher,
-        0, // sa_sigaction
-        0, // sa_mask;
-        SA_RESETHAND,
-        0
-    };
-
+    struct sigaction s;
+    memset(&s, 0, sizeof(s));
+    s.sa_handler = segSaultCatcher;
+    s.sa_flags = SA_RESETHAND;
     ASSERT(0 == sigaction(SIGSEGV, &s, 0));
 }

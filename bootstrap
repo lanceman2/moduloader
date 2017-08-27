@@ -96,7 +96,7 @@ if [ -n "$sha512sum" ] ; then
     set -x
 else
     set +x
-    echo "The sha512sum of the downloaded file, before compressing it:"
+    echo "The sha512sum of the downloaded file, before compressing was:"
     set -x
     sha512sum quickbuild.make.org
 fi

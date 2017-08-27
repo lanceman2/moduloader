@@ -1,6 +1,6 @@
-
 #include <stdio.h>
-#include "base.hpp"
+#include "debug.h"
+#include "Base.hpp"
 
 class TestModule: public Base
 {
@@ -13,25 +13,37 @@ class TestModule: public Base
 
 TestModule::TestModule(int arg):Base(arg)
 {
-    printf("Calling %s arg=%d\n", __func__, arg);
+    SPEW("Calling %s arg=%d\n", __func__, arg);
 }
 
 TestModule::~TestModule(void)
 {
-    printf("Calling %s\n", __func__);
+    SPEW("Calling %s\n", __func__);
 }
 
 int TestModule::execute(void)
 {
-    printf("Calling %s\n", __func__);
+    SPEW("Calling %s\n", __func__);
     return 120;
+}
+
+static Base *create(int arg)
+{
+    return new TestModule(arg);
+}
+
+static void destroy(Base *b)
+{
+    delete b;
 }
 
 extern "C"
 {
-    Base *createModuleObject(int arg)
+    void loader(void **c, void **d)
     {
-        return new TestModule(arg);
+        SPEW("\n");
+
+        *c = (void *) create;
+        *d = (void *) destroy;
     }
 }
-

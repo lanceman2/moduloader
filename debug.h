@@ -18,6 +18,7 @@
 
 #include <stdbool.h>
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,7 +31,16 @@ extern void _spew(const char *pre, const char *file,
 extern void _assertAction(void);
 extern void _catchSigFault(void);
 
-//#pragma GCC system_header
+
+// ##__VA_ARGS__ comma not eaten with -std=c++0x
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=44317
+//
+// There is a GCC bug where GCC wrongly warns about ##__VA_ARGS__, so using
+// #pragma GCC system_header suppresses these warnings.  Should this GCC
+// bug get fixed, it'd be good to remove this next code line.
+// See also: https://gcc.gnu.org/onlinedocs/cpp/System-Headers.html
+#pragma GCC system_header
+
 
 #  define _SPEW(pre, fmt, ... )\
      _spew(pre, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
@@ -72,24 +82,24 @@ extern void _catchSigFault(void);
 
 #  define WARN(fmt, ...) _SPEW("WARN: ", fmt, ##__VA_ARGS__)
 
-#  define NOTICE() _SPEW("NOTICE: ", fmt, ##__VA_ARGS__)
-#  define DSPEW()  _SPEW("DEBUG: ", fmt, ##__VA_ARGS__)
+#  define NOTICE(fmt, ...) _SPEW("NOTICE: ", fmt, ##__VA_ARGS__)
+#  define DSPEW(fmt, ...)  _SPEW("DEBUG: ", fmt, ##__VA_ARGS__)
 
 #  define DASSERT(x)  ASSERT(val)
-#  define DVASSERT(x) VASSERT(val, fmt, ##__VA_ARGS__)
+#  define DVASSERT(x, fmt, ...) VASSERT(val, fmt, ##__VA_ARGS__)
 
 
 #else
 
 
-#  define SPEW()      /* empty marco */
+#  define SPEW(fmt, ...)      /* empty marco */
 
-#  define WARN()      /* empty marco */
-#  define NOTICE()    /* empty marco */
-#  define DSPEW()     /* empty marco */
+#  define WARN(fmt, ...)      /* empty marco */
+#  define NOTICE(fmt, ...)    /* empty marco */
+#  define DSPEW(fmt, ...)     /* empty marco */
 
-#  define DASSERT()   /* empty marco */
-#  define DVASSERT(x) /* empty marco */
+#  define DASSERT(fmt, ...)   /* empty marco */
+#  define DVASSERT(x, fmt, ...) /* empty marco */
 
 
 #endif // #ifdef DEBUG

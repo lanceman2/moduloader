@@ -1,23 +1,35 @@
-
-#include "moduloader.hpp"
-#include "base.hpp"
-#include "debug.h"
+#include "Base.hpp"
+#include "ModuleLoader.hpp"
 
 int main(void)
 {
     SPEW("\n");
     SPEW("more spew %d\n", 56);
-    WARN("more spew %d\n", 56);
+    //ASSERT(0);
+    //FAIL("\n");
 
     _catchSigFault();
 
-    Base *testModule = Moduloader<Base>("testModule.so", 0);
+    ModuleLoader<Base, Base *(*)(int)> *ml =
+        new ModuleLoader<Base, Base *(*)(int)>("./testModule.so");
 
+    Base *testModule = ml->create(45);
+
+    SPEW("\n");
     ASSERT(testModule);
-
+    SPEW("\n");
     testModule->execute();
+    testModule->execute();
+    testModule->execute();
+    testModule->execute();
+    testModule->execute();
+    testModule->execute();
+    testModule->execute();
+    SPEW("\n");
 
-    delete testModule;
+    ml->destroy(testModule);
+
+    SPEW("%s RAN SUCCESSFULLY\n", __FILE__);
 
     return 0;
 }
