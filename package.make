@@ -10,7 +10,7 @@
 
 
 # C/C++ Pre-processor flags used for all in this package
-#CPPFLAGS := -DDEBUG
+CPPFLAGS := -DDEBUG
 
 # Any time the (g++) C++ compiler runs we set these command line
 # option flags
