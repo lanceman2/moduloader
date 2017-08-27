@@ -1,7 +1,6 @@
 #ifndef _GNU_SOURCE
 #  define _GNU_SOURCE
 #endif
-#include <list>
 #include <dlfcn.h>
 #include <stdio.h>
 
@@ -16,17 +15,13 @@ class ModuleLoader
         virtual ~ModuleLoader(void);
         Create create;
         void *(*destroy)(Base *base);
-
-    private:
-        // We keep a list of Base objects
-        // that are created so we may cleanup.
-        std::list<Base *> objects;
 };
+
 
 template <class Base, class Create>
 ModuleLoader<Base, Create>::ModuleLoader(const char *dso_path)
 {
-    void *dhandle = dlopen(dso_path, RTLD_LAZY);
+    void *dhandle = dlopen(dso_path, RTLD_LAZY|RTLD_NODELETE);
     if(!dhandle) {
         ERROR("dlopen() failed: %s\n", dlerror());
         return;
@@ -45,6 +40,13 @@ ModuleLoader<Base, Create>::ModuleLoader(const char *dso_path)
 
     if(!create)
         ERROR("failed to get create factory function\n");
+
+    dlerror(); // clear the error.
+    if(dlclose(dhandle)) {
+        error = dlerror();
+        ERROR("dlclose() failed: %s\n", error);
+        return;
+    }
 }
 
 template <class Base, class Create>
