@@ -9,7 +9,7 @@ class CatModuleLoader: private ModuleLoader<Cat, Cat *(*)(int)>
         virtual ~CatModuleLoader(void);
         Cat *create(int arg);
         void destroy(Cat *cat);
-    private:
 
+    private:
         std::map<Cat *, Cat *> cats;   
 };

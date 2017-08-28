@@ -14,6 +14,10 @@ test_ModuleLoader_LDFLAGS := -Wl,--export-dynamic -ldl
 test_CatModuleLoader_SOURCES := test_CatModuleLoader.cpp CatModuleLoader.cpp debug.c Cat.cpp
 test_CatModuleLoader_LDFLAGS := -Wl,--export-dynamic -ldl
 
+test_staticCatModuleLoader_SOURCES := test_staticCatModuleLoader.cpp CatModuleLoader.cpp debug.c Cat.cpp
+test_staticCatModuleLoader_LDFLAGS := -Wl,--export-dynamic -ldl
+
+
 # test_NCatModuleLoader test a more specific class Cat loader
 # using a class that inherits the ModuleLoader template class
 # and makes many ModuleLoader objects.
