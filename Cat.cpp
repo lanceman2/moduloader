@@ -5,10 +5,10 @@
 
 Cat::Cat(int arg):arg(arg)
 {
-    SPEW("Calling %s(arg=%d)\n", __func__, arg);
+    SPEW("Calling %s(arg=%d)", __func__, arg);
 }
 
 Cat::~Cat(void)
 {
-    SPEW("Calling %s arg=%d\n", __func__, arg);
+    SPEW("Calling %s arg=%d", __func__, arg);
 }

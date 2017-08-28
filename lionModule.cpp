@@ -13,17 +13,17 @@ class LionModule: public Cat
 
 LionModule::LionModule(int arg):Cat(arg)
 {
-    SPEW("Calling %s arg=%d\n", __func__, arg);
+    SPEW("Calling %s arg=%d", __func__, arg);
 }
 
 LionModule::~LionModule(void)
 {
-    SPEW("Calling %s arg=%d\n", __func__, arg);
+    SPEW("Calling %s arg=%d", __func__, arg);
 }
 
 int LionModule::execute(void)
 {
-    WARN("Calling %s arg=%d\n", __func__, arg);
+    WARN("Calling %s arg=%d", __func__, arg);
     return 120;
 }
 
@@ -41,8 +41,7 @@ extern "C"
 {
     void loader(void **c, void **d)
     {
-        SPEW("\n");
-
+        SPEW();
         *c = (void *) create;
         *d = (void *) destroy;
     }

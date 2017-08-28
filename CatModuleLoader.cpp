@@ -5,7 +5,7 @@
 CatModuleLoader::CatModuleLoader(const char *dso_path):ModuleLoader(dso_path)
 {
     if(!ModuleLoader<Cat, Cat *(*)(int)>::create) return; // Fail
-    SPEW("\n");
+    SPEW();
 }
 
 CatModuleLoader::~CatModuleLoader(void)
@@ -38,5 +38,5 @@ void CatModuleLoader::destroy(Cat *cat)
     // Call the destructor using the module factory
     ModuleLoader<Cat, Cat *(*)(int)>::destroy(cat);
 
-    SPEW("\n");
+    SPEW();
 }

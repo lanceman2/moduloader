@@ -1,16 +1,12 @@
 // Test that we can make many many ModuleLoaders which may be a dumb thing
 // to do, but never the less this should be able to do it.
 
+#include "debug.h"
 #include "CatModuleLoader.hpp"
 
 int main(void)
 {
-    SPEW("\n");
-    SPEW("more spew %d\n", 56);
-    //ASSERT(0);
-    //FAIL("\n");
-
-    _catchSigFault();
+    modLoader_catchSigFault();
 
 #define N 8
 #define M 5
@@ -27,9 +23,9 @@ int main(void)
         for(int i=0; i<N; ++i)
             cats[i + N*j] = ml[j]->create(i + N*j);
 
-        SPEW("j=%d\n", j);
+        SPEW("j=%d", j);
 
-        SPEW("%s RAN loop %d\n", __FILE__, j);
+        SPEW("%s RAN loop %d", __FILE__, j);
     }
 
     for(int i=0; i<N*M; ++i)

@@ -1,13 +1,9 @@
+#include "debug.h"
 #include "CatModuleLoader.hpp"
 
 int main(void)
 {
-    SPEW("\n");
-    SPEW("more spew %d\n", 56);
-    //ASSERT(0);
-    //FAIL("\n");
-
-    _catchSigFault();
+    modLoader_catchSigFault();
 
     CatModuleLoader *ml = new CatModuleLoader("./lionModule.so");
 
@@ -21,7 +17,7 @@ int main(void)
         cats[i]->execute();
 
 
-    SPEW("\n");
+    SPEW();
 
     delete ml;
 

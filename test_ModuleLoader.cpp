@@ -1,28 +1,25 @@
 #include "Cat.hpp"
+#include "debug.h"
 #include "ModuleLoader.hpp"
 
 int main(void)
 {
-    SPEW("\n");
-    SPEW("more spew %d\n", 56);
-    //ASSERT(0);
-    //FAIL("\n");
-
-    _catchSigFault();
+    SPEW();
+    modLoader_catchSigFault();
 
     ModuleLoader<Cat, Cat *(*)(int)> *ml =
         new ModuleLoader<Cat, Cat *(*)(int)>("./lionModule.so");
 
     Cat *catModule = ml->create(45);
 
-    SPEW("\n");
-    ASSERT(catModule);
-    SPEW("\n");
+    SPEW();
+    ASSERT(catModule, "");
+    SPEW();
     catModule->execute();
     catModule->execute();
     catModule->execute();
     catModule->execute();
-    SPEW("\n");
+    SPEW();
 
     ml->destroy(catModule);
 
