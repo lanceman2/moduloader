@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "debug.h"
-#include "Cat.hpp"
+#include "CatModule.hpp"
 
 class LionModule: public Cat
 {
@@ -27,6 +27,9 @@ int LionModule::execute(void)
     return 120;
 }
 
+
+// The two Lion/Cat factory functions:
+
 static Cat *create(int arg)
 {
     return new LionModule(arg);
@@ -35,14 +38,4 @@ static Cat *create(int arg)
 static void destroy(Cat *c)
 {
     delete c;
-}
-
-extern "C"
-{
-    void loader(void **c, void **d)
-    {
-        SPEW();
-        *c = (void *) create;
-        *d = (void *) destroy;
-    }
 }
