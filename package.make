@@ -29,7 +29,7 @@ CPPFLAGS := -DDEBUG
 
 # Tell quickbuild to sub @DEBUG_SYMBOL_PREFIX@ @MACRO_API_PREFIX@ (and so
 # on) with the values from the make variables given here:
-CONFIG_VARS := DEBUG_SYMBOL_PREFIX MACRO_API_PREFIX
+IN_VARS := DEBUG_SYMBOL_PREFIX MACRO_API_PREFIX
 
 
 # default value that may be overridden config.make
