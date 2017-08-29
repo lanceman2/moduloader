@@ -51,4 +51,3 @@ ModuleLoader<Base, Create>::~ModuleLoader(void)
 {
 
 }
-
