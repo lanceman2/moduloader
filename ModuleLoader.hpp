@@ -10,17 +10,19 @@ class ModuleLoader
     public:
         ModuleLoader(const char *dso_path);
         virtual ~ModuleLoader(void);
+        // create is a function pointer.
         Create create;
+        // destroy is a function pointer.
         void *(*destroy)(Base *base);
 };
 
 
 template <class Base, class Create>
-ModuleLoader<Base, Create>::ModuleLoader(const char *dso_path)
+ModuleLoader<Base, Create>::ModuleLoader(const char *dso_path):create(0),destroy(0)
 {
     void *dhandle = dlopen(dso_path, RTLD_LAZY|RTLD_NODELETE);
     if(!dhandle) {
-        ERROR("dlopen() failed: %s\n", dlerror());
+        WARN("dlopen() failed: %s\n", dlerror());
         return;
     }
 
@@ -29,19 +31,22 @@ ModuleLoader<Base, Create>::ModuleLoader(const char *dso_path)
          (void *(*)(void **, void **)) dlsym(dhandle, "loader");
     char *error = dlerror();
     if(error != 0) {
-        ERROR("dlsym() failed: %s\n", error);
+        WARN("dlsym() failed: %s\n", error);
         return;
     }
 
     loader((void **) &create, (void **) &destroy);
 
     if(!create)
-        ERROR("failed to get create factory function\n");
+    {
+        WARN("failed to get create factory function\n");
+        destroy = 0;
+    }
 
     dlerror(); // clear the error.
     if(dlclose(dhandle)) {
         error = dlerror();
-        ERROR("dlclose() failed: %s\n", error);
+        WARN("dlclose(%p) failed: %s\n", dhandle, error);
         return;
     }
 }
