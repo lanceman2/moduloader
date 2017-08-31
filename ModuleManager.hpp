@@ -25,8 +25,12 @@ class ModuleManager
         // We assume that the dso_path string is unique
         // to the DSO plugin file.
         TCreate create(const char *dso_path);
+        // Add to the list of T objects that get destroyed
+        // when this ModuleManager is destroyed.
         bool addCleanup(const char *dso_path, T *t);
-        bool destroy(T*);
+        // You do not have to add it if you want to manage
+        // it's destruction with this function:
+        bool destroy(T* t);
 
     private:
 
