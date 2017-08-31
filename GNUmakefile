@@ -1,9 +1,6 @@
 # This is a GNU make file that uses GNU make extensions.
 
 
-# You can set in config.make
-#  CPPFLAGS := -DDEBUG
-
 
 # test_ModuleLoader tests the ModuleLoader template base class
 test_ModuleLoader_SOURCES := test_ModuleLoader.cpp debug.c Cat.cpp

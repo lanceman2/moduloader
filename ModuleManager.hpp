@@ -1,5 +1,3 @@
-
-
 // T is the base class (not a pointer)
 // TCreate is the creator factory function so like
 //
@@ -18,8 +16,6 @@
 //
 //
 
-// This class is the highest lever we take this idea in this package.
-
 template <class T, class TCreate>
 class ModuleManager
 {
@@ -29,7 +25,7 @@ class ModuleManager
         // We assume that the dso_path string is unique
         // to the DSO plugin file.
         TCreate create(const char *dso_path);
-        bool addCleanup(T *t, const char *dso_path);
+        bool addCleanup(const char *dso_path, T *t);
         bool destroy(T*);
 
     private:
@@ -41,29 +37,32 @@ class ModuleManager
         typename std::map<const char *, void *(*)(T *)> destroyers;
 
         // list of existing T object's and destroy functions
-        typename std::map<T *, void *(*)(T *)> objects;
+        // used in cleaning up in the ModuleManager destructor
+        typename std::map<T *, void *(*)(T *)> cleanupObjects;
 };
 
 template <class T, class TCreate>
 ModuleManager<T, TCreate>::ModuleManager(void)
 {
-    SPEW();
+    DSPEW();
 }
 
 template <class T, class TCreate>
 ModuleManager<T, TCreate>::~ModuleManager(void)
 {
-    // First: destroy all the T objects that have been listed with
+    DSPEW("Enter");
+    // First: destroy all the T cleanupObjects that have been listed with
     // addCleanup():
-    typename std::map<T *, void *(*)(T *)>::iterator it;
-    for(it=objects.begin(); it!=objects.end(); ++it)
+    typename std::map<T *, void *(*)(T *)>::const_iterator it;
+    for(it=cleanupObjects.begin(); it!=cleanupObjects.end(); ++it)
         (it->second)(it->first);
 
     // Empty the lists
     creators.clear();
     destroyers.clear();
-    objects.clear();
+    cleanupObjects.clear();
 
+    DSPEW("Finish");
     // TODO: We are not releasing resources in the dlclose() call
     // in ModuleLoader, but that is likely okay for our use case.
 }
@@ -73,7 +72,7 @@ ModuleManager<T, TCreate>::~ModuleManager(void)
 template <class T, class TCreate>
 TCreate ModuleManager<T, TCreate>::create(const char *dso_path)
 {
-    typename std::map<const char *, TCreate>::iterator it =
+    typename std::map<const char *, TCreate>::const_iterator it =
         creators.find(dso_path);
 
     if(it == creators.end())
@@ -99,13 +98,13 @@ TCreate ModuleManager<T, TCreate>::create(const char *dso_path)
 
 // Return false on success.
 template <class T, class TCreate>
-bool ModuleManager<T, TCreate>::addCleanup(T *t, const char *dso_path)
+bool ModuleManager<T, TCreate>::addCleanup(const char *dso_path, T *t)
 {
-    typename std::map<const char *, TCreate> it = destroyers.find(dso_path);
+    typename std::map<const char *, void *(*)(T *)>::const_iterator it = destroyers.find(dso_path);
     if(it != destroyers.end())
     {
-        // Add this ModuleLoader's destroy function to the list.
-        destroyers[t] = it->second;
+        // Add this ModuleLoader's destroy function to the cleanupObjects list.
+        cleanupObjects[t] = it->second;
         return false; // success
     }
     WARN("Plugin loader for DSO file \"%s\" was not found\n", dso_path);
@@ -118,12 +117,13 @@ template <class T, class TCreate>
 bool ModuleManager<T, TCreate>::destroy(T *t)
 {
     // Find the T object
-    typename std::map<T *, void *(*)(T *)> it = destroyers.find(t);
-    if(it != destroyers.end())
+    typename std::map<T *, void *(*)(T *)>::const_iterator it = cleanupObjects.find(t);
+    if(it != cleanupObjects.end())
     {
+        // Call function destroy()
         (it->second)(it->first);
         // Remove the T object from the list (map)
-        destroyers.erase(it);
+        cleanupObjects.erase(it->first);
         return false; // success
     }
     WARN("destroy function for object %p was not found\n", t);

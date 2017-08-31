@@ -25,7 +25,7 @@ CFLAGS := -g -Wall -Werror
 
 
 # C/C++ Pre-processor flags used for all in this package
-CPPFLAGS := -DDEBUG
+CPPFLAGS := -DDEBUG -DSPEW_LEVEL_DEBUG
 
 # Tell quickbuild to sub @DEBUG_SYMBOL_PREFIX@ @MACRO_API_PREFIX@ (and so
 # on) with the values from the make variables given here:
