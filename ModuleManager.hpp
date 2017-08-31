@@ -1,5 +1,4 @@
 
-#include <map>
 
 // T is the base class (not a pointer)
 // TCreate is the creator factory function so like
@@ -29,104 +28,104 @@ class ModuleManager
         virtual ~ModuleManager(void);
         // We assume that the dso_path string is unique
         // to the DSO plugin file.
-        TCreate * create(const char *dso_path);
+        TCreate create(const char *dso_path);
         bool addCleanup(T *t, const char *dso_path);
         bool destroy(T*);
 
     private:
-        // list of created ModuleLoader objects
-        std::map<const char *, ModuleLoader<T, TCreate> *> loaders;
 
-        // list of existing T object's destroy functions
-        std::map<T *, void *(*)(T *)> destroyers;
+        // list of T object create() factory functions
+        typename std::map<const char *, TCreate> creators;
+
+        // list of T object destroy() factory functions
+        typename std::map<const char *, void *(*)(T *)> destroyers;
+
+        // list of existing T object's and destroy functions
+        typename std::map<T *, void *(*)(T *)> objects;
 };
 
 template <class T, class TCreate>
-ModuleManager::ModuleManager(void)
+ModuleManager<T, TCreate>::ModuleManager(void)
 {
     SPEW();
 }
 
 template <class T, class TCreate>
-ModuleManager::~ModuleManager(void)
+ModuleManager<T, TCreate>::~ModuleManager(void)
 {
     // First: destroy all the T objects that have been listed with
     // addCleanup():
-    for(std::map<T *, void *(*)(T *)>::iterator it = destroys.begin();
-            it!=map.end(); ++it)
+    typename std::map<T *, void *(*)(T *)>::iterator it;
+    for(it=objects.begin(); it!=objects.end(); ++it)
         (it->second)(it->first);
 
-    // Second: delete all the ModuleLoader objects
-    for(std::map<const char *, ModuleLoader<T, TCreate> *> it =
-            loaders.begin(); it!=map.end(); ++it)
-        delete it->second;
-
     // Empty the lists
-    loaders.clear();
+    creators.clear();
     destroyers.clear();
+    objects.clear();
 
-    // The maps where all statically declared so they cleanup with
-    // this ModuleManager object.
+    // TODO: We are not releasing resources in the dlclose() call
+    // in ModuleLoader, but that is likely okay for our use case.
 }
 
 
 // Returns 0 on error.
 template <class T, class TCreate>
-TCreate *ModuleManager::create(const char *dso_path)
+TCreate ModuleManager<T, TCreate>::create(const char *dso_path)
 {
-    std::map<const char *, ModuleLoader<T, TCreate> *>::iterator it;
-    TCreate *create;
-    
-    it = loaders.find[dso_path];
+    typename std::map<const char *, TCreate>::iterator it =
+        creators.find(dso_path);
 
-    if(it == std::map::end)
+    if(it == creators.end())
     {
-        ModuleLoader<T, TCreate> *ml = new ModuleLoader<T, TCreate>(dso_path);
-        loaders[dso_path] = ml->create;
-        if(!ml->create)
+        // Create a ModuleLoader on this stack
+        ModuleLoader<T, TCreate> ml(dso_path);
+        creators[dso_path] = ml.create;
+        destroyers[dso_path] = ml.destroy;
+        if(!ml.create)
             WARN("Module with file: %s was not loaded\n", dso_path);
-        return ml->create; // error
+        return ml.create; // error if 0
     }
 
     // We return the create function and we cannot call it because there
     // is no way to declare generic argument prototypes in C++.  They must
     // call addCleanup(t) after this so this object may cleanup it in the
-    // destructor.
-    return it.second; // success
+    // destructor, or not.  They can't call delete object, the factory
+    // destroy() needs to do that so that modules more do that modules
+    // do.
+    return it->second; // success
 }
 
 
 // Return false on success.
 template <class T, class TCreate>
-bool addCleanup(T *t, const char *dso_path)
+bool ModuleManager<T, TCreate>::addCleanup(T *t, const char *dso_path)
 {
-    std::map<const char *, ModuleLoader<T, TCreate> *> lm_it = loaders.find(dso_path);
-    if(it == std::map::end)
+    typename std::map<const char *, TCreate> it = destroyers.find(dso_path);
+    if(it != destroyers.end())
     {
-        WARN("Plugin loader for DSO file \"%s\" was not found\n", dso_path);
-        return true; // error
+        // Add this ModuleLoader's destroy function to the list.
+        destroyers[t] = it->second;
+        return false; // success
     }
-    // Add this ModuleLoader's destroy function to the list.
-    destroyers[t] = lm_it->second->destroy;
-    return false; // success
+    WARN("Plugin loader for DSO file \"%s\" was not found\n", dso_path);
+    return true; // error
 }
 
 
 // Returns false if the destructor was called and true otherwise.
 template <class T, class TCreate>
-bool ModuleManager::destroy(T *t)
+bool ModuleManager<T, TCreate>::destroy(T *t)
 {
     // Find the T object
-    std::map<T *, void *(*)(T *)> destroyers; it = destroyers.find(t);
-    if(it != std::map::end)
+    typename std::map<T *, void *(*)(T *)> it = destroyers.find(t);
+    if(it != destroyers.end())
     {
         (it->second)(it->first);
-    
         // Remove the T object from the list (map)
         destroyers.erase(it);
         return false; // success
     }
-
     WARN("destroy function for object %p was not found\n", t);
     return true; // error
 }

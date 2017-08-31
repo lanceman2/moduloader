@@ -24,9 +24,13 @@ test_staticCatModuleLoader_LDFLAGS := -Wl,--export-dynamic -ldl
 test_NCatModuleLoader_SOURCES := test_NCatModuleLoader.cpp CatModuleLoader.cpp debug.c Cat.cpp
 test_NCatModuleLoader_LDFLAGS := -Wl,--export-dynamic -ldl
 
+test_ModuleManager_SOURCES := test_ModuleManager.cpp debug.c Cat.cpp
+test_ModuleManager_LDFLAGS := -Wl,--export-dynamic -ldl
 
 
 lionModule.so_SOURCES := lionModule.cpp
+tigerModule.so_SOURCES := tigerModule.cpp
+
 
 include ./quickbuild.make
 
